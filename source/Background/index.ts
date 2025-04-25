@@ -82,8 +82,8 @@ const GEMINI_API_ENDPOINT =
 const geminiResponseSchema = {
   type: "OBJECT", // Using string values as SDK might not be available here
   properties: {
-    allowAccess: { type: "BOOLEAN" },
     reasoning: { type: "STRING" },
+    allowAccess: { type: "BOOLEAN" },
   },
   required: ["allowAccess", "reasoning"],
 };
@@ -95,10 +95,17 @@ async function callGeminiApi(
   originalReason: string,
 ): Promise<{ responseText: string; allowAccess: boolean }> {
   // Updated prompt with more context
-  const prompt = `A user wants to access a website (${url}) they previously blocked. 
-Their original reason for blocking was: "${originalReason || "None provided"}".
+  const prompt = `You're controlling a browser extension that helps the user avoid websites they've blocked for themselves. 
+  For example, the user might have blocked social media or news websites if they enduce anxiety. The user managed to define which websites are bad, and you're here to help them have self control when they spontanously want to enter the website, maybe without thinking.
+  The extension asks the user why they want to enter the website.
+  Good reasons might be "there is a pandemic and I need to check if it's coming my way" or "my friend has a birthday, I just want to check the facebook event for the address".
+  Bad reasons might be "I'm bored" or "I didn't check the news for some time".
+
+  Help decide this situation:
+  A user wants to access a website (${url}) they previously blocked. 
+Their original reason for blocking was: "${originalReason || "(no reason provided)"}".
 Their current justification for temporary access is: "${userMessage}". 
-Analyze this justification in the context of the site and the original reason. Should they be allowed temporary access? Provide a brief reasoning.`;
+Analyze this justification in the context of the site and the original reason. Should they be allowed temporary access? Start with your reasoning/thoughts, then decide if they should be allowed access.`;
 
   try {
     const response = await fetch(`${GEMINI_API_ENDPOINT}?key=${apiKey}`, {
