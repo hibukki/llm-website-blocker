@@ -28,15 +28,7 @@ const BlockedPage: React.FC = () => {
     ]);
   }, []);
 
-  console.log("BlockedPage blockedUrl", blockedUrl);
-
   const handleSendMessage = async (): Promise<void> => {
-    console.log(
-      "handleSendMessage: chatInput",
-      chatInput,
-      "isLoading",
-      isLoading,
-    );
     if (!chatInput.trim() || isLoading) return;
 
     const userMessage: ChatMessage = { sender: "user", text: chatInput };
@@ -71,8 +63,6 @@ const BlockedPage: React.FC = () => {
       window.location.href = blockedUrl;
     }
   };
-
-  console.log("Render states:", { isLoading, isUnblocked });
 
   return (
     <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
@@ -116,11 +106,9 @@ const BlockedPage: React.FC = () => {
           type="text"
           value={chatInput}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            console.log("onChange", e.target.value);
             setChatInput(e.target.value);
           }}
           onKeyDown={(e: React.KeyboardEvent) => {
-            console.log("onKeyDown", e.key);
             if (e.key === "Enter") {
               handleSendMessage();
             }
