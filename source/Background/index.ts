@@ -18,7 +18,7 @@ browser.runtime.onInstalled.addListener((): void => {
 // Listener for web requests
 browser.webRequest.onBeforeRequest.addListener(
   async (
-    details: WebRequest.OnBeforeRequestDetailsType
+    details: WebRequest.OnBeforeRequestDetailsType,
   ): Promise<WebRequest.BlockingResponse> => {
     const url = new URL(details.url);
     const domain = url.hostname.startsWith("www.")
@@ -37,15 +37,15 @@ browser.webRequest.onBeforeRequest.addListener(
     const blockedSites: BlockedSite[] = data.blockedSites || [];
 
     const blockedSite = blockedSites.find((site) =>
-      domain.includes(site.domain)
+      domain.includes(site.domain),
     );
 
     if (blockedSite) {
       console.log(
-        `Blocking navigation to ${details.url} (Matched: ${blockedSite.domain})`
+        `Blocking navigation to ${details.url} (Matched: ${blockedSite.domain})`,
       );
       const redirectUrl = browser.runtime.getURL(
-        `blocked.html?reason=${encodeURIComponent(blockedSite.reason || "")}&url=${encodeURIComponent(details.url)}`
+        `blocked.html?reason=${encodeURIComponent(blockedSite.reason || "")}&url=${encodeURIComponent(details.url)}`,
       );
       return { redirectUrl };
     }
@@ -57,5 +57,5 @@ browser.webRequest.onBeforeRequest.addListener(
     urls: ["<all_urls>"], // Listen to all URLs
     types: ["main_frame"], // Only block top-level navigation
   },
-  ["blocking"] // Specify that this listener intends to block requests
+  ["blocking"], // Specify that this listener intends to block requests
 );
