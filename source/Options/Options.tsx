@@ -12,18 +12,41 @@ const Options: React.FC = () => {
   const [domain, setDomain] = useState("");
   const [reason, setReason] = useState("");
   const [blockedSites, setBlockedSites] = useState<BlockedSite[]>([]);
+  const [apiKey, setApiKey] = useState("");
+  const [saveStatus, setSaveStatus] = useState("");
 
-  // Load blocked sites from storage on component mount
   useEffect(() => {
-    browser.storage.local.get("blockedSites").then((result) => {
-      setBlockedSites(result.blockedSites || []);
-    });
+    browser.storage.local
+      .get(["blockedSites", "geminiApiKey"])
+      .then((result) => {
+        setBlockedSites(result.blockedSites || []);
+        setApiKey(result.geminiApiKey || "");
+      });
   }, []);
+
+  const handleApiKeyChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ): void => {
+    setApiKey(event.target.value);
+    setSaveStatus("");
+  };
+
+  const handleSaveApiKey = useCallback(async () => {
+    setSaveStatus("Saving...");
+    try {
+      await browser.storage.local.set({ geminiApiKey: apiKey });
+      setSaveStatus("API Key Saved!");
+      setTimeout(() => setSaveStatus(""), 2000);
+    } catch (error) {
+      console.error("Error saving API key:", error);
+      setSaveStatus("Error saving key.");
+    }
+  }, [apiKey]);
 
   const handleAddSite = useCallback(
     async (event: React.FormEvent) => {
-      event.preventDefault(); // Prevent form submission
-      if (!domain) return; // Basic validation
+      event.preventDefault();
+      if (!domain) return;
 
       const newSite: BlockedSite = {
         domain: domain.trim(),
@@ -33,26 +56,67 @@ const Options: React.FC = () => {
 
       await browser.storage.local.set({ blockedSites: updatedSites });
       setBlockedSites(updatedSites);
-      setDomain(""); // Clear input fields
+      setDomain("");
       setReason("");
     },
-    [domain, reason, blockedSites]
+    [domain, reason, blockedSites],
   );
 
   const handleRemoveSite = useCallback(
     async (domainToRemove: string) => {
       const updatedSites = blockedSites.filter(
-        (site) => site.domain !== domainToRemove
+        (site) => site.domain !== domainToRemove,
       );
       await browser.storage.local.set({ blockedSites: updatedSites });
       setBlockedSites(updatedSites);
     },
-    [blockedSites]
+    [blockedSites],
   );
 
   return (
     <div className="options-container">
       <h1>Website Blocker Settings</h1>
+
+      <div
+        style={{
+          marginBottom: "20px",
+          paddingBottom: "20px",
+          borderBottom: "1px solid #ccc",
+        }}
+      >
+        <h2>Gemini API Key</h2>
+        <p style={{ fontSize: "0.9em", color: "#555" }}>
+          Needed for the &quot;Negotiate Access&quot; feature on blocked pages.
+          The key is stored locally in the extension&apos;s storage.
+        </p>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <input
+            type="password"
+            id="apiKey"
+            value={apiKey}
+            onChange={handleApiKeyChange}
+            placeholder="Enter your Gemini API Key"
+            style={{ flexGrow: 1, marginRight: "10px" }}
+          />
+          <button
+            type="button"
+            onClick={handleSaveApiKey}
+            disabled={saveStatus === "Saving..."}
+          >
+            Save Key
+          </button>
+        </div>
+        {saveStatus && (
+          <p
+            style={{
+              marginTop: "5px",
+              color: saveStatus.startsWith("Error") ? "red" : "green",
+            }}
+          >
+            {saveStatus}
+          </p>
+        )}
+      </div>
 
       <form onSubmit={handleAddSite}>
         <h2>Add a site to block</h2>
@@ -90,6 +154,7 @@ const Options: React.FC = () => {
               <strong>{site.domain}</strong>:{" "}
               {site.reason || "No reason provided"}
               <button
+                type="button"
                 onClick={() => handleRemoveSite(site.domain)}
                 style={{ marginLeft: "10px" }}
               >

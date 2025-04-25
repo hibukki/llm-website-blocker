@@ -1,8 +1,19 @@
-import { browser, WebRequest } from "webextension-polyfill-ts";
+import { browser, WebRequest, Runtime } from "webextension-polyfill-ts";
 
 interface BlockedSite {
   domain: string;
   reason: string;
+}
+
+// --- Types for Messaging ---
+interface AskGeminiPayload {
+  message: string;
+  // history?: ChatMessage[]; // Could add history later
+}
+
+interface BackgroundListenerMessage {
+  type: "ASK_GEMINI";
+  payload: AskGeminiPayload;
 }
 
 browser.runtime.onInstalled.addListener((): void => {
@@ -58,4 +69,161 @@ browser.webRequest.onBeforeRequest.addListener(
     types: ["main_frame"], // Only block top-level navigation
   },
   ["blocking"], // Specify that this listener intends to block requests
+);
+
+// --- Gemini API Integration ---
+
+const GEMINI_API_ENDPOINT =
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+
+// Define the expected JSON schema for the response
+const geminiResponseSchema = {
+  type: "OBJECT", // Using string values as SDK might not be available here
+  properties: {
+    allowAccess: { type: "BOOLEAN" },
+    reasoning: { type: "STRING" },
+  },
+  required: ["allowAccess", "reasoning"],
+};
+
+async function callGeminiApi(
+  apiKey: string,
+  userMessage: string,
+): Promise<{ responseText: string; allowAccess: boolean }> {
+  // Simplified prompt - Rely on schema for formatting
+  const prompt = `A user wants to access a website they previously blocked. 
+Their justification is: "${userMessage}". 
+Analyze this justification. Should they be allowed temporary access? Provide a brief reasoning.`;
+
+  try {
+    const response = await fetch(`${GEMINI_API_ENDPOINT}?key=${apiKey}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        // Add generationConfig for structured output
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: geminiResponseSchema,
+        },
+        // Add safety settings if needed
+        // safetySettings: [...],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(
+        "Gemini API Error Status:",
+        response.status,
+        "Body:",
+        errorBody,
+      );
+      throw new Error(
+        `Gemini API request failed with status ${response.status}`,
+      );
+    }
+
+    const data = await response.json();
+
+    // Safely extract content - expecting JSON directly now
+    const candidate = data?.candidates?.[0];
+    const contentPart = candidate?.content?.parts?.[0];
+
+    // Check if the content part itself exists
+    if (!contentPart || !contentPart.text) {
+      console.error(
+        "Gemini API response missing JSON content part:",
+        JSON.stringify(data),
+      );
+      throw new Error(
+        "Invalid response structure from Gemini API (missing content part)",
+      );
+    }
+
+    // The 'text' field should now contain the JSON string directly
+    const jsonText = contentPart.text;
+
+    try {
+      // Parse the JSON string provided by the API
+      const parsedContent = JSON.parse(jsonText);
+
+      if (
+        typeof parsedContent.allowAccess === "boolean" &&
+        typeof parsedContent.reasoning === "string"
+      ) {
+        return {
+          responseText: parsedContent.reasoning,
+          allowAccess: parsedContent.allowAccess,
+        };
+      }
+      console.error(
+        "Gemini response JSON content has unexpected format:",
+        parsedContent,
+      );
+      throw new Error("Gemini response JSON format incorrect.");
+    } catch (parseError) {
+      console.error(
+        "Failed to parse Gemini JSON response text:",
+        jsonText,
+        parseError,
+      );
+      throw new Error("Gemini response was not valid JSON as requested.");
+    }
+  } catch (error) {
+    console.error("Error calling Gemini API:", error);
+    throw error instanceof Error ? error : new Error(String(error));
+  }
+}
+
+// Listener for messages from content scripts (e.g., blocked.tsx)
+browser.runtime.onMessage.addListener(
+  async (
+    message: BackgroundListenerMessage,
+    sender: Runtime.MessageSender,
+  ): Promise<void> => {
+    if (message.type === "ASK_GEMINI") {
+      const { message: userMessage } = message.payload;
+      let apiKey: string | undefined;
+
+      try {
+        // 1. Get API Key from storage
+        const storageResult = await browser.storage.local.get("geminiApiKey");
+        apiKey = storageResult.geminiApiKey;
+
+        if (!apiKey) {
+          throw new Error("Gemini API Key not set in options.");
+        }
+
+        // 2. Call Gemini API
+        const { responseText, allowAccess } = await callGeminiApi(
+          apiKey,
+          userMessage,
+        );
+
+        // 3. Send Success Response back
+        if (sender.tab?.id) {
+          browser.tabs.sendMessage(sender.tab.id, {
+            type: "GEMINI_RESPONSE",
+            payload: { responseText, allowAccess },
+          });
+        }
+      } catch (error) {
+        console.error("Error handling ASK_GEMINI message:", error);
+        // 4. Send Error Response back
+        if (sender.tab?.id) {
+          browser.tabs.sendMessage(sender.tab.id, {
+            type: "GEMINI_ERROR",
+            payload: {
+              error: error instanceof Error ? error.message : String(error),
+            },
+          });
+        }
+      }
+    }
+    // Return true if you want to send a response asynchronously (optional here as we use tabs.sendMessage)
+    // return true;
+  },
 );

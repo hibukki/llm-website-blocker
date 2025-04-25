@@ -1,10 +1,26 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import { browser } from "webextension-polyfill-ts"; // Need browser API for messaging
 
 interface ChatMessage {
   id: string;
   sender: "user" | "gemini";
   text: string;
+}
+
+// Define expected message structure from background
+interface GeminiResponsePayload {
+  responseText: string;
+  allowAccess: boolean;
+}
+
+interface GeminiErrorPayload {
+  error: string;
+}
+
+interface BackgroundMessage {
+  type: "GEMINI_RESPONSE" | "GEMINI_ERROR";
+  payload: GeminiResponsePayload | GeminiErrorPayload;
 }
 
 const BlockedPage: React.FC = () => {
@@ -15,6 +31,44 @@ const BlockedPage: React.FC = () => {
   const [isUnblocked, setIsUnblocked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Listener for responses from the background script
+  useEffect(() => {
+    const handleBackgroundMessage = (message: BackgroundMessage): void => {
+      if (message.type === "GEMINI_RESPONSE") {
+        // Type assertion needed because TS doesn't automatically narrow based on 'type' here
+        const payload = message.payload as GeminiResponsePayload;
+        const { responseText, allowAccess } = payload;
+        const geminiMessage: ChatMessage = {
+          id: `gemini-${Date.now()}`,
+          sender: "gemini",
+          text: responseText,
+        };
+        setChatMessages((prev) => [...prev, geminiMessage]);
+        setIsUnblocked(allowAccess);
+        setIsLoading(false);
+      } else if (message.type === "GEMINI_ERROR") {
+        // Type assertion needed
+        const payload = message.payload as GeminiErrorPayload;
+        const errorMessage = payload.error;
+        const geminiMessage: ChatMessage = {
+          id: `gemini-error-${Date.now()}`,
+          sender: "gemini",
+          text: `Error: ${errorMessage}`,
+        };
+        setChatMessages((prev) => [...prev, geminiMessage]);
+        setIsLoading(false); // Stop loading on error
+      }
+    };
+
+    browser.runtime.onMessage.addListener(handleBackgroundMessage);
+
+    // Cleanup listener on component unmount
+    return () => {
+      browser.runtime.onMessage.removeListener(handleBackgroundMessage);
+    };
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  // Get initial data
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const reasonParam = urlParams.get("reason");
@@ -38,32 +92,34 @@ const BlockedPage: React.FC = () => {
       sender: "user",
       text: chatInput,
     };
-    setChatMessages((prev) => [...prev, userMessage]);
+    // Add user message immediately to UI
+    const currentMessages = [...chatMessages, userMessage];
+    setChatMessages(currentMessages);
     setChatInput("");
     setIsLoading(true);
+    setIsUnblocked(false); // Reset unblocked state on new message
 
-    // --- Placeholder for Gemini API Call --- C
-    // In a real implementation, you would send `chatInput`
-    // to your secure backend, which calls the Gemini API.
-    // The backend would return the response text and an allow/deny boolean.
-    console.log("Simulating Gemini call for message:", userMessage.text);
-    // await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-
-    // Simulated response (always deny for now)
-    const geminiResponseText =
-      "Access request denied. Please focus on other tasks.";
-    const allowAccess = false; // TODO: Replace with actual Gemini logic
-    // --- End Placeholder ---
-
-    const geminiMessage: ChatMessage = {
-      id: `gemini-${Date.now()}`,
-      sender: "gemini",
-      text: geminiResponseText,
-    };
-
-    setChatMessages((prev) => [...prev, geminiMessage]);
-    setIsUnblocked(allowAccess);
-    setIsLoading(false);
+    // Send message to background script for processing
+    try {
+      await browser.runtime.sendMessage({
+        type: "ASK_GEMINI",
+        payload: {
+          // Send relevant history (optional, but helpful for context)
+          // history: currentMessages.slice(-5), // Example: send last 5 messages
+          message: userMessage.text, // Send only the latest message for now
+        },
+      });
+      // Response will be handled by the message listener in useEffect
+    } catch (error) {
+      console.error("Error sending message to background script:", error);
+      const geminiMessage: ChatMessage = {
+        id: `gemini-error-${Date.now()}`,
+        sender: "gemini",
+        text: `Error communicating with background script: ${error instanceof Error ? error.message : String(error)}`,
+      };
+      setChatMessages((prev) => [...prev, geminiMessage]);
+      setIsLoading(false); // Stop loading on comms error
+    }
   };
 
   const handleProceed = (): void => {
