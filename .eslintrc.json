@@ -2,7 +2,8 @@
 	"extends": [
 		"@abhijithvijayan/eslint-config/typescript",
 		"@abhijithvijayan/eslint-config/node",
-		"@abhijithvijayan/eslint-config/react"
+		"@abhijithvijayan/eslint-config/react",
+		"plugin:prettier/recommended"
 	],
 	"parserOptions": {
 		"project": [
@@ -21,7 +22,8 @@
 		"node/no-unpublished-import": "off",
 		"node/no-unsupported-features/es-syntax": ["error", {
 			"ignores": ["modules"]
-		}]
+		}],
+		"prettier/prettier": ["error", { "singleQuote": false }]
 	},
 	"env": {
 		"webextensions": true
