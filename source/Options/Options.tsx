@@ -77,26 +77,19 @@ const Options: React.FC = () => {
     <div className="options-container">
       <h1>Website Blocker Settings</h1>
 
-      <div
-        style={{
-          marginBottom: "20px",
-          paddingBottom: "20px",
-          borderBottom: "1px solid #ccc",
-        }}
-      >
+      <div className="api-key-section">
         <h2>Gemini API Key</h2>
-        <p style={{ fontSize: "0.9em", color: "#555" }}>
+        <p className="description">
           Needed for the &quot;Negotiate Access&quot; feature on blocked pages.
           The key is stored locally in the extension&apos;s storage.
         </p>
-        <div style={{ display: "flex", alignItems: "center" }}>
+        <div className="input-group">
           <input
             type="password"
             id="apiKey"
             value={apiKey}
             onChange={handleApiKeyChange}
             placeholder="Enter your Gemini API Key"
-            style={{ flexGrow: 1, marginRight: "10px" }}
           />
           <button
             type="button"
@@ -108,17 +101,14 @@ const Options: React.FC = () => {
         </div>
         {saveStatus && (
           <p
-            style={{
-              marginTop: "5px",
-              color: saveStatus.startsWith("Error") ? "red" : "green",
-            }}
+            className={`status-message ${saveStatus.startsWith("Error") ? "error" : "success"}`}
           >
             {saveStatus}
           </p>
         )}
       </div>
 
-      <form onSubmit={handleAddSite}>
+      <form className="add-site-form" onSubmit={handleAddSite}>
         <h2>Add a site to block</h2>
         <div>
           <label htmlFor="domain">Domain:</label>
@@ -144,26 +134,29 @@ const Options: React.FC = () => {
         <button type="submit">Add Site</button>
       </form>
 
-      <h2>Currently Blocked Sites</h2>
-      {blockedSites.length === 0 ? (
-        <p>No sites blocked yet.</p>
-      ) : (
-        <ul>
-          {blockedSites.map((site) => (
-            <li key={site.domain}>
-              <strong>{site.domain}</strong>:{" "}
-              {site.reason || "No reason provided"}
-              <button
-                type="button"
-                onClick={() => handleRemoveSite(site.domain)}
-                style={{ marginLeft: "10px" }}
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="blocked-sites-list">
+        <h2>Currently Blocked Sites</h2>
+        {blockedSites.length === 0 ? (
+          <p className="no-sites">No sites blocked yet.</p>
+        ) : (
+          <ul>
+            {blockedSites.map((site) => (
+              <li key={site.domain}>
+                <span>
+                  <strong>{site.domain}</strong>:{" "}
+                  {site.reason || "No reason provided"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveSite(site.domain)}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };

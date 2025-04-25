@@ -7,4 +7,151 @@
 body {
   color: $black;
   background-color: $greyWhite;
+  padding: $spacing-large;
+  font-family: sans-serif;
+}
+
+h1 {
+  font-size: 1.8em;
+  margin-bottom: $spacing-large;
+  color: $blue;
+}
+
+h2 {
+  font-size: 1.4em;
+  margin-top: $spacing-large;
+  margin-bottom: $spacing-medium;
+  border-bottom: 1px solid $greyLight;
+  padding-bottom: $spacing-small;
+}
+
+label {
+  display: block;
+  margin-bottom: $spacing-small;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: $spacing-medium;
+  margin-bottom: $spacing-medium;
+  border: 1px solid $greyLight;
+  border-radius: $border-radius;
+  box-sizing: border-box;
+  font-size: 1em;
+
+  &:focus {
+    outline: none;
+    border-color: $blue;
+    box-shadow: 0 0 0 2px rgba($blue, 0.2);
+  }
+}
+
+button {
+  padding: $spacing-medium $spacing-large;
+  background-color: $blue;
+  color: white;
+  border: none;
+  border-radius: $border-radius;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background-color: darken($blue, 10%);
+  }
+
+  &:disabled {
+    background-color: $greyMedium;
+    cursor: not-allowed;
+  }
+}
+
+.api-key-section,
+.add-site-form,
+.blocked-sites-list {
+  margin-bottom: $spacing-large;
+}
+
+.api-key-section {
+  border-bottom: 1px solid $greyLight;
+  padding-bottom: $spacing-large;
+
+  p.description {
+    font-size: 0.9em;
+    color: $greyDark;
+    margin-bottom: $spacing-medium;
+  }
+
+  .input-group {
+    display: flex;
+    align-items: center;
+
+    input {
+      flex-grow: 1;
+      margin-right: $spacing-medium;
+      margin-bottom: 0;
+    }
+  }
+
+  p.status-message {
+    margin-top: $spacing-small;
+    font-size: 0.9em;
+    &.success {
+      color: $green;
+    }
+    &.error {
+      color: $red;
+    }
+  }
+}
+
+.add-site-form {
+  div {
+    margin-bottom: $spacing-medium;
+  }
+  button[type="submit"] {
+    margin-top: $spacing-small;
+  }
+}
+
+.blocked-sites-list {
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    background-color: $white;
+    padding: $spacing-medium;
+    margin-bottom: $spacing-medium;
+    border: 1px solid $greyLight;
+    border-radius: $border-radius;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    span {
+      flex-grow: 1;
+      margin-right: $spacing-medium;
+      word-break: break-all;
+    }
+
+    button {
+      background-color: $red;
+      padding: $spacing-small $spacing-medium;
+      font-size: 0.9em;
+      margin-left: $spacing-medium;
+
+      &:hover:not(:disabled) {
+        background-color: darken($red, 10%);
+      }
+    }
+  }
+
+  p.no-sites {
+    color: $greyDark;
+    font-style: italic;
+  }
 }

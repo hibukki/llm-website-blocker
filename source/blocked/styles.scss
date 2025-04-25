@@ -1,0 +1,173 @@
+@import "../styles/fonts";
+@import "../styles/reset";
+@import "../styles/variables";
+
+// No webext-base-css needed here for a simpler look
+
+body {
+  color: $black;
+  background-color: $greyWhite;
+  padding: $spacing-large;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 90vh; // Try to fill viewport height
+}
+
+.blocked-container {
+  max-width: 600px;
+  margin: auto; // Center the content
+  background-color: $white;
+  padding: $spacing-xlarge;
+  border-radius: $border-radius-large;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: 1.8em;
+  margin-bottom: $spacing-medium;
+  color: $red; // Use red for blocking theme
+  text-align: center;
+}
+
+p.blocked-info {
+  text-align: center;
+  margin-bottom: $spacing-small;
+  strong {
+    font-weight: bold;
+  }
+  em {
+    font-style: italic;
+    color: $greyDark;
+  }
+}
+
+hr {
+  border: none;
+  border-top: 1px solid $greyLight;
+  margin: $spacing-large 0;
+}
+
+h2 {
+  font-size: 1.4em;
+  margin-bottom: $spacing-medium;
+  text-align: center;
+}
+
+.chat-area {
+  border: 1px solid $greyLight;
+  border-radius: $border-radius;
+  padding: $spacing-medium;
+  margin-bottom: $spacing-medium;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: $greyWhite;
+
+  p {
+    margin-bottom: $spacing-medium;
+    padding: $spacing-small $spacing-medium;
+    border-radius: $border-radius;
+    max-width: 85%;
+    word-wrap: break-word;
+
+    &.user-message {
+      background-color: lighten($blue, 40%);
+      margin-left: auto; // Align right
+      text-align: right;
+    }
+
+    &.gemini-message {
+      background-color: $white;
+      margin-right: auto; // Align left (default)
+      text-align: left;
+      border: 1px solid $greyMedium;
+    }
+
+    &.error-message {
+        background-color: lighten($red, 40%);
+        color: darken($red, 15%);
+        border: 1px solid $red;
+        margin-right: auto;
+        text-align: left;
+    }
+
+    strong {
+      font-weight: bold;
+      display: block;
+      margin-bottom: $spacing-xsmall;
+    }
+
+    em {
+        font-style: italic;
+        color: $greyDark;
+    }
+  }
+}
+
+.input-area {
+  display: flex;
+  margin-bottom: $spacing-large;
+
+  input[type="text"] {
+    flex-grow: 1;
+    padding: $spacing-medium;
+    border: 1px solid $greyLight;
+    border-radius: $border-radius 0 0 $border-radius; // Round left corners
+    font-size: 1em;
+    margin: 0;
+
+    &:focus {
+      outline: none;
+      border-color: $blue;
+      box-shadow: 0 0 0 2px rgba($blue, 0.2);
+      z-index: 1; // Ensure focus shadow overlaps button border
+    }
+
+    &:disabled {
+        background-color: $greyLight;
+    }
+  }
+
+  button {
+    padding: $spacing-medium $spacing-large;
+    background-color: $blue;
+    color: white;
+    border: 1px solid $blue; // Add border for focus consistency
+    border-left: none; // Remove left border to join with input
+    border-radius: 0 $border-radius $border-radius 0; // Round right corners
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background-color: darken($blue, 10%);
+    }
+
+    &:disabled {
+      background-color: $greyMedium;
+      border-color: $greyMedium;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.proceed-section {
+  text-align: center;
+  margin-top: $spacing-large;
+
+  p {
+    color: $green;
+    font-weight: bold;
+    margin-bottom: $spacing-medium;
+  }
+
+  button {
+     background-color: $green;
+     padding: $spacing-medium $spacing-large;
+     font-size: 1em;
+
+     &:hover {
+        background-color: darken($green, 10%);
+     }
+  }
+} 

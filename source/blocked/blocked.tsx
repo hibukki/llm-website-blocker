@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { browser } from "webextension-polyfill-ts"; // Need browser API for messaging
 
+import "./styles.scss"; // Import the SCSS file
+
 interface ChatMessage {
   id: string;
   sender: "user" | "gemini";
@@ -135,34 +137,26 @@ const BlockedPage: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
+    <div className="blocked-container">
       <h1>Site Blocked</h1>
-      <p>
+      <p className="blocked-info">
         Access to <strong>{blockedUrl}</strong> is blocked.
       </p>
-      <p>
+      <p className="blocked-info">
         Your reason: <em>{reason}</em>
       </p>
 
-      <hr style={{ margin: "20px 0" }} />
+      <hr />
 
       <h2>Negotiate Access</h2>
-      <div
-        style={{
-          marginBottom: "10px",
-          maxHeight: "300px",
-          overflowY: "auto",
-          border: "1px solid #ccc",
-          padding: "10px",
-        }}
-      >
+      <div className="chat-area">
         {chatMessages.map((msg) => (
           <p
             key={msg.id}
-            style={{ textAlign: msg.sender === "user" ? "right" : "left" }}
+            className={`${msg.sender}-message ${msg.text.startsWith("Error:") ? "error-message" : ""}`.trim()}
           >
             <strong>{msg.sender === "user" ? "You" : "Assistant"}:</strong>{" "}
-            {msg.text}
+            {msg.text.replace(/^Error: /, "")}
           </p>
         ))}
         {isLoading && (
@@ -171,7 +165,7 @@ const BlockedPage: React.FC = () => {
           </p>
         )}
       </div>
-      <div>
+      <div className="input-area">
         <input
           type="text"
           value={chatInput}
@@ -196,8 +190,8 @@ const BlockedPage: React.FC = () => {
       </div>
 
       {isUnblocked && (
-        <div style={{ marginTop: "20px" }}>
-          <p style={{ color: "green" }}>Access granted!</p>
+        <div className="proceed-section">
+          <p>Access granted!</p>
           <button type="button" onClick={handleProceed}>
             Proceed to {blockedUrl}
           </button>
