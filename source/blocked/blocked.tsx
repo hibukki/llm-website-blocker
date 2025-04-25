@@ -151,12 +151,16 @@ const BlockedPage: React.FC = () => {
         Access to <strong>{blockedUrl}</strong> is blocked.
       </p>
       <p className="blocked-info">
-        Your reason: <em>{reason}</em>
+        Remember your reason: <em>{reason}</em>
+      </p>
+      <p className="blocked-info">
+        Remember your past self tried to help you avoid this, consider doing
+        something else instead?
       </p>
 
       <hr />
 
-      <h2>Confirm Need for Access</h2>
+      <h2>Or is this time different?</h2>
       <div className="chat-area" ref={chatAreaRef}>
         {chatMessages.map((msg) => (
           <p
