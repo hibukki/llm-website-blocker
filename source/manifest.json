@@ -16,8 +16,10 @@
   "permissions": [
     "activeTab",
     "storage",
-    "http://*/*",
-    "https://*/*"
+    "webRequest",
+    "webRequestBlocking",
+    "tabs",
+    "<all_urls>"
   ],
 
   "content_security_policy": "script-src 'self'; object-src 'self'",
@@ -56,20 +58,17 @@
     "__chrome__chrome_style": false
   },
 
+  "web_accessible_resources": ["blocked.html"],
+
   "background": {
-    "scripts": [
-      "js/background.bundle.js"
-    ],
+    "scripts": ["js/background.bundle.js"],
     "__chrome|opera__persistent": false
   },
 
-  "content_scripts": [{
-    "matches": [
-      "http://*/*",
-      "https://*/*"
-    ],
-    "js": [
-      "js/contentScript.bundle.js"
-    ]
-  }]
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["js/contentScript.bundle.js"]
+    }
+  ]
 }

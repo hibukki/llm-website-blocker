@@ -63,6 +63,7 @@ module.exports = {
     contentScript: path.join(sourcePath, 'ContentScript', 'index.ts'),
     popup: path.join(sourcePath, 'Popup', 'index.tsx'),
     options: path.join(sourcePath, 'Options', 'index.tsx'),
+    blocked: path.join(sourcePath, 'blocked', 'blocked.tsx'),
   },
 
   output: {
@@ -164,6 +165,13 @@ module.exports = {
       chunks: ['options'],
       hash: true,
       filename: 'options.html',
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(sourcePath, 'blocked', 'blocked.html'),
+      inject: 'body',
+      chunks: ['blocked'],
+      hash: true,
+      filename: 'blocked.html',
     }),
     // write css file(s) to build folder
     new MiniCssExtractPlugin({filename: 'css/[name].css'}),

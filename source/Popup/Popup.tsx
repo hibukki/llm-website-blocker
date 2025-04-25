@@ -43,7 +43,7 @@ const Popup: React.FC = () => {
                 );
               }}
             >
-              Buy Me A Coffee
+              Buy Me A Coffee 2
             </button>
           </li>
         </ul>
