@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
 import { browser } from "webextension-polyfill-ts"; // Need browser API for messaging
 
@@ -38,6 +38,7 @@ const BlockedPage: React.FC = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isUnblocked, setIsUnblocked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const chatAreaRef = useRef<HTMLDivElement>(null);
 
   // Listener for responses from the background script
   useEffect(() => {
@@ -91,6 +92,13 @@ const BlockedPage: React.FC = () => {
       },
     ]);
   }, []);
+
+  // Effect to scroll chat down on new messages
+  useEffect(() => {
+    if (chatAreaRef.current) {
+      chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
 
   const handleSendMessage = async (): Promise<void> => {
     if (!chatInput.trim() || isLoading) return;
@@ -149,7 +157,7 @@ const BlockedPage: React.FC = () => {
       <hr />
 
       <h2>Confirm Need for Access</h2>
-      <div className="chat-area">
+      <div className="chat-area" ref={chatAreaRef}>
         {chatMessages.map((msg) => (
           <p
             key={msg.id}
