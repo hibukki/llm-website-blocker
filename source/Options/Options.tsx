@@ -79,10 +79,20 @@ const Options: React.FC = () => {
 
       <div className="api-key-section">
         <h2>Gemini API Key</h2>
-        <p className="description">
-          Needed for the &quot;Negotiate Access&quot; feature on blocked pages.
-          The key is stored locally in the extension&apos;s storage.
-        </p>
+        <div className="api-key-header">
+          <p className="description">
+            Needed for the chat feature on blocked pages. The key is stored
+            locally in the extension&apos;s storage.
+          </p>
+          <a
+            href="https://ai.google.dev/gemini-api/docs/api-key"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="api-key-help-link"
+          >
+            How to get an API key?
+          </a>
+        </div>
         <div className="input-group">
           <input
             type="password"

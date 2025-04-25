@@ -78,10 +78,28 @@ button {
   border-bottom: 1px solid $greyLight;
   padding-bottom: $spacing-large;
 
-  p.description {
-    font-size: 0.9em;
-    color: $greyDark;
+  .api-key-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: $spacing-medium;
+  }
+
+  p.description {
+    margin-bottom: 0;
+    margin-right: $spacing-large;
+  }
+
+  a.api-key-help-link {
+    font-size: 0.9em;
+    color: $blue;
+    text-decoration: none;
+    white-space: nowrap;
+    margin-top: 2px;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
   .input-group {

@@ -20,6 +20,17 @@ h1 {
   color: $blue;
 }
 
+.warning-message {
+  background-color: lighten($red, 35%);
+  color: darken($red, 15%);
+  border: 1px solid lighten($red, 20%);
+  padding: $spacing-medium;
+  margin-bottom: $spacing-large;
+  border-radius: $border-radius;
+  font-size: 0.9em;
+  text-align: left;
+}
+
 .status-info {
   margin-bottom: $spacing-large;
   font-size: 1.1em;

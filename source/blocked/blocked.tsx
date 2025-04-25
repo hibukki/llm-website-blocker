@@ -87,7 +87,7 @@ const BlockedPage: React.FC = () => {
       {
         id: `gemini-${Date.now()}`,
         sender: "gemini",
-        text: "This site is blocked. Please explain why you need to access it.",
+        text: "This site is blocked to help you stay focused. If you absolutely need access, please state your specific reason.",
       },
     ]);
   }, []);
@@ -148,7 +148,7 @@ const BlockedPage: React.FC = () => {
 
       <hr />
 
-      <h2>Negotiate Access</h2>
+      <h2>Confirm Need for Access</h2>
       <div className="chat-area">
         {chatMessages.map((msg) => (
           <p
