@@ -23,6 +23,12 @@ interface BackgroundMessage {
   payload: GeminiResponsePayload | GeminiErrorPayload;
 }
 
+interface AskGeminiPayload {
+  message: string;
+  url: string;
+  originalReason: string;
+}
+
 const BlockedPage: React.FC = () => {
   const [reason, setReason] = useState("");
   const [blockedUrl, setBlockedUrl] = useState("");
@@ -92,22 +98,21 @@ const BlockedPage: React.FC = () => {
       sender: "user",
       text: chatInput,
     };
-    // Add user message immediately to UI
     const currentMessages = [...chatMessages, userMessage];
     setChatMessages(currentMessages);
     setChatInput("");
     setIsLoading(true);
-    setIsUnblocked(false); // Reset unblocked state on new message
+    setIsUnblocked(false);
 
     // Send message to background script for processing
     try {
       await browser.runtime.sendMessage({
         type: "ASK_GEMINI",
         payload: {
-          // Send relevant history (optional, but helpful for context)
-          // history: currentMessages.slice(-5), // Example: send last 5 messages
-          message: userMessage.text, // Send only the latest message for now
-        },
+          message: userMessage.text,
+          url: blockedUrl,
+          originalReason: reason,
+        } satisfies AskGeminiPayload,
       });
       // Response will be handled by the message listener in useEffect
     } catch (error) {

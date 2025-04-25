@@ -8,6 +8,8 @@ interface BlockedSite {
 // --- Types for Messaging ---
 interface AskGeminiPayload {
   message: string;
+  url: string;
+  originalReason: string;
   // history?: ChatMessage[]; // Could add history later
 }
 
@@ -89,11 +91,14 @@ const geminiResponseSchema = {
 async function callGeminiApi(
   apiKey: string,
   userMessage: string,
+  url: string,
+  originalReason: string,
 ): Promise<{ responseText: string; allowAccess: boolean }> {
-  // Simplified prompt - Rely on schema for formatting
-  const prompt = `A user wants to access a website they previously blocked. 
-Their justification is: "${userMessage}". 
-Analyze this justification. Should they be allowed temporary access? Provide a brief reasoning.`;
+  // Updated prompt with more context
+  const prompt = `A user wants to access a website (${url}) they previously blocked. 
+Their original reason for blocking was: "${originalReason || "None provided"}".
+Their current justification for temporary access is: "${userMessage}". 
+Analyze this justification in the context of the site and the original reason. Should they be allowed temporary access? Provide a brief reasoning.`;
 
   try {
     const response = await fetch(`${GEMINI_API_ENDPOINT}?key=${apiKey}`, {
@@ -103,12 +108,10 @@ Analyze this justification. Should they be allowed temporary access? Provide a b
       },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        // Add generationConfig for structured output
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: geminiResponseSchema,
         },
-        // Add safety settings if needed
         // safetySettings: [...],
       }),
     });
@@ -185,7 +188,7 @@ browser.runtime.onMessage.addListener(
     sender: Runtime.MessageSender,
   ): Promise<void> => {
     if (message.type === "ASK_GEMINI") {
-      const { message: userMessage } = message.payload;
+      const { message: userMessage, url, originalReason } = message.payload;
       let apiKey: string | undefined;
 
       try {
@@ -197,10 +200,12 @@ browser.runtime.onMessage.addListener(
           throw new Error("Gemini API Key not set in options.");
         }
 
-        // 2. Call Gemini API
+        // 2. Call Gemini API with extra context
         const { responseText, allowAccess } = await callGeminiApi(
           apiKey,
           userMessage,
+          url,
+          originalReason,
         );
 
         // 3. Send Success Response back
