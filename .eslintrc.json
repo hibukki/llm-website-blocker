@@ -23,8 +23,7 @@
 		"node/no-unsupported-features/es-syntax": ["error", {
 			"ignores": ["modules"]
 		}],
-		"prettier/prettier": ["error", { "singleQuote": false, "trailingComma": "none" }],
-		"comma-dangle": "off"
+		"prettier/prettier": ["error", { "singleQuote": false }]
 	},
 	"env": {
 		"webextensions": true

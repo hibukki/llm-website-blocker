@@ -1,0 +1,15 @@
+{
+  // Enable format on save
+  "editor.formatOnSave": true,
+
+  // Specify ESLint as the default formatter for TypeScript and TSX files
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+
+  // Enable ESLint to format files (necessary for formatOnSave)
+  "eslint.format.enable": true
+} 
