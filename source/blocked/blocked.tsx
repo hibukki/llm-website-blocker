@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
 interface ChatMessage {
+  id: string;
   sender: "user" | "gemini";
   text: string;
 }
@@ -22,6 +23,7 @@ const BlockedPage: React.FC = () => {
     setBlockedUrl(decodeURIComponent(urlParam || "Unknown URL"));
     setChatMessages([
       {
+        id: `gemini-${Date.now()}`,
         sender: "gemini",
         text: "This site is blocked. Please explain why you need to access it.",
       },
@@ -31,7 +33,11 @@ const BlockedPage: React.FC = () => {
   const handleSendMessage = async (): Promise<void> => {
     if (!chatInput.trim() || isLoading) return;
 
-    const userMessage: ChatMessage = { sender: "user", text: chatInput };
+    const userMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      sender: "user",
+      text: chatInput,
+    };
     setChatMessages((prev) => [...prev, userMessage]);
     setChatInput("");
     setIsLoading(true);
@@ -49,10 +55,13 @@ const BlockedPage: React.FC = () => {
     const allowAccess = false; // TODO: Replace with actual Gemini logic
     // --- End Placeholder ---
 
-    setChatMessages((prev) => [
-      ...prev,
-      { sender: "gemini", text: geminiResponseText },
-    ]);
+    const geminiMessage: ChatMessage = {
+      id: `gemini-${Date.now()}`,
+      sender: "gemini",
+      text: geminiResponseText,
+    };
+
+    setChatMessages((prev) => [...prev, geminiMessage]);
     setIsUnblocked(allowAccess);
     setIsLoading(false);
   };
@@ -86,9 +95,9 @@ const BlockedPage: React.FC = () => {
           padding: "10px",
         }}
       >
-        {chatMessages.map((msg, index) => (
+        {chatMessages.map((msg) => (
           <p
-            key={`${index}-${msg.sender}`}
+            key={msg.id}
             style={{ textAlign: msg.sender === "user" ? "right" : "left" }}
           >
             <strong>{msg.sender === "user" ? "You" : "Assistant"}:</strong>{" "}
