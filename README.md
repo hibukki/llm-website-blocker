@@ -13,8 +13,8 @@ It explains how to make this plugin for development/production for firefox/chrom
 
 ### Blocked website
 
-<img width="619" alt="image" src="https://github.com/user-attachments/assets/70eec3b2-e373-4031-8352-fd1e78776f11" />
+<img width="619" alt="image" src="https://github.com/user-attachments/assets/70eec3b2-e373-4031-8352-fd1e78776f11" style="border: 1px solid #000;" />
 
 ### Settings
 
-<img width="608" alt="image" src="https://github.com/user-attachments/assets/686488e6-b6f6-4cb7-8b30-0e6c38569080" />
+<img width="608" alt="image" src="https://github.com/user-attachments/assets/686488e6-b6f6-4cb7-8b30-0e6c38569080" style="border: 1px solid #000;" />
